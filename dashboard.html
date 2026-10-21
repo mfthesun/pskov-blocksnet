@@ -1234,7 +1234,7 @@ document.getElementById('dict').innerHTML = '<tr><th>Показатель</th><t
   ['Доступность с учётом площади', 'мин', 'среднее время до всех кварталов, взвешенное по их площади', 'area_accessibility'],
   ['ОКН, доля в зонах охраны, остановки', 'шт., доля, м', 'пространственные пересечения и ближайший сосед', '— (расчёт проекта)'],
 ].map(r => `<tr>${r.map((c, i) => `<td>${i === 3 ? `<code>${esc(c)}</code>` : esc(c)}</td>`).join('')}</tr>`).join('');
-document.getElementById('footer').innerHTML = `Практика 2 «Технологии ИИ в урбанистике», ИДУ ИТМО · Яковлев Д. А., Цыганов В. А., C4107 · Данные: © участники OpenStreetMap (ODbL); ОКН — ${esc(A.heritage)}; транспорт — ${esc(A.transport)} · Страница собрана скриптом <code>scripts/build_dashboard.py</code> из <code>data/results/*.geojson</code>.`;
+document.getElementById('footer').innerHTML = `Практика 2 «Технологии ИИ в урбанистике», ИДУ ИТМО · Яковлев Д. А., Цыганов В. А., C4207 · Данные: © участники OpenStreetMap (ODbL); ОКН — ${esc(A.heritage)}; транспорт — ${esc(A.transport)} · Страница собрана скриптом <code>scripts/build_dashboard.py</code> из <code>data/results/*.geojson</code>.`;
 
 // ---------- обновление ----------
 function refresh() { const list = filtered(); renderKpis(list); renderCharts(list); renderTable(list); blockLayer.setStyle(styleFor); }
