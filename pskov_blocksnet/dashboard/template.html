@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Псков · квартальная модель</title>
+<!-- Leaflet 1.9.4 (BSD-2-Clause) встраивается скриптом сборки: страница работает без CDN -->
+<style>/*__LEAFLET_CSS__*/</style>
+<script>/*__LEAFLET_JS__*/</script>
+<style>
+:root{
+  --bg:#f4f5f7; --card:#fff; --ink:#1d2430; --muted:#5f6b7a; --line:#e3e6eb; --accent:#1f5f99; --accent2:#c0392b;
+  --warn-bg:#fff6e5; --warn:#8a5a00; --radius:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+header{background:#13263b;color:#fff;padding:18px 24px}
+header h1{margin:0;font-size:22px;font-weight:650}
+header .sub{color:#b9c7d8;margin-top:4px;font-size:13px}
+main{max-width:1400px;margin:0 auto;padding:16px 16px 40px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px}
+.filters label{display:flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:13px;color:var(--muted)}
+.filters select{border:0;background:transparent;font:inherit;color:var(--ink);font-weight:600;max-width:220px}
+.filters .count{margin-left:auto;color:var(--muted);font-size:13px}
+.filters button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;cursor:pointer;font:inherit}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.kpi .t{color:var(--muted);font-size:12.5px}
+.kpi .v{font-size:24px;font-weight:650;margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi .n{color:var(--muted);font-size:11.5px;margin-top:2px}
+.est{display:inline-block;font-size:10.5px;font-weight:600;color:var(--warn);background:var(--warn-bg);border-radius:4px;padding:0 5px;margin-left:4px;vertical-align:middle}
+h2{font-size:17px;margin:22px 0 10px}
+.grid-map{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(280px,1fr);gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;min-width:0}
+.card h3{margin:0 0 8px;font-size:14.5px}
+.card .hint{color:var(--muted);font-size:12px;margin:-2px 0 8px}
+#map{height:620px;border-radius:8px}
+.map-tools{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:8px;font-size:13px}
+.map-tools select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.map-tools label{display:flex;gap:4px;align-items:center;color:var(--muted)}
+.legend{background:rgba(255,255,255,.95);padding:8px 10px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.25);font-size:12px;line-height:1.5;max-width:260px}
+.legend b{display:block;margin-bottom:4px}
+.legend i{display:inline-block;width:14px;height:12px;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.15)}
+#panel .empty{color:var(--muted);text-align:center;padding:60px 10px}
+#panel table{width:100%;border-collapse:collapse;font-size:13px}
+#panel td{padding:4px 2px;border-bottom:1px solid var(--line);vertical-align:top}
+#panel td:nth-child(2),#panel td:nth-child(3){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#panel td:nth-child(3){color:var(--muted)}
+#panel .ttl{font-size:16px;font-weight:650}
+.grid-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.grid-charts{grid-template-columns:1fr}}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-size:11px;fill:#3b4554}
+.note{font-size:12px;color:var(--muted);margin-top:6px}
+table.data{width:100%;border-collapse:collapse;font-size:13px}
+table.data th,table.data td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.data th{cursor:pointer;color:var(--muted);font-weight:600;user-select:none;position:sticky;top:0;background:#fff}
+table.data th:nth-child(2),table.data td:nth-child(2),table.data th:nth-child(11),table.data td:nth-child(11){text-align:left}
+table.data tbody tr:hover{background:#f3f7fb;cursor:pointer}
+.table-wrap{overflow-x:auto}
+.table-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.table-tools input{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;width:150px}
+.table-tools button,.pager button{font:inherit;padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer}
+.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:8px;color:var(--muted);font-size:13px}
+.method{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.method{grid-template-columns:1fr}}
+.method ul{margin:6px 0;padding-left:18px}
+.method li{margin:3px 0}
+table.dict{width:100%;border-collapse:collapse;font-size:12.5px}
+table.dict td,table.dict th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+table.dict th{color:var(--muted)}
+code{background:#eef1f5;padding:0 4px;border-radius:4px;font-size:12px}
+footer{color:var(--muted);font-size:12px;margin-top:20px;border-top:1px solid var(--line);padding-top:10px}
+@media (max-width:900px){.grid-map{grid-template-columns:1fr}#map{height:460px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Псков · квартальная модель BlocksNet</h1>
+  <div class="sub" id="subtitle"></div>
+</header>
+<main>
+  <div class="filters">
+    <label>Землепользование <select id="f-lu"></select></label>
+    <label>Морфотип «Стрелки» <select id="f-st"></select></label>
+    <label>Население <select id="f-pop">
+      <option value="all">Все</option><option value="0">Нет населения</option><option value="1-500">1–500</option>
+      <option value="500-2000">500–2 000</option><option value="2000-">≥ 2 000</option></select></label>
+    <label>ОКН <select id="f-okn"><option value="all">Все</option><option value="yes">Есть ОКН</option>
+      <option value="zone">В зонах охраны &gt; 50 %</option></select></label>
+    <button id="f-reset">Сбросить</button>
+    <span class="count" id="f-count"></span>
+  </div>
+
+  <section class="kpis" id="kpis"></section>
+
+  <h2>Карта кварталов</h2>
+  <div class="grid-map">
+    <div class="card">
+      <div class="map-tools">
+        <label>Показатель <select id="indicator"></select></label>
+        <label><input type="checkbox" id="ov-schools" checked> школы</label>
+        <label><input type="checkbox" id="ov-links"> потоки к школам</label>
+        <label><input type="checkbox" id="ov-okn"> ОКН</label>
+        <label><input type="checkbox" id="ov-zones"> зоны охраны</label>
+        <label><input type="checkbox" id="ov-stops"> остановки</label>
+      </div>
+      <div id="map"></div>
+      <div class="note" id="map-note"></div>
+    </div>
+    <div class="card" id="panel">
+      <h3>Выбранный квартал</h3>
+      <div class="empty">⌖<br>Выберите квартал на карте или в таблице.<br>Здесь появятся его показатели и сравнение с медианой по городу.</div>
+    </div>
+  </div>
+
+  <h2>Структура территории</h2>
+  <div class="grid-charts">
+    <div class="card chart"><h3>Землепользование, га</h3><div class="hint">Площадь кварталов по преобладающей функции (<code>assign_land_use</code>)</div><div id="ch-lu"></div></div>
+    <div class="card chart"><h3>Морфотипы застройки, кварталов</h3>
+      <div class="hint"><label><input type="radio" name="mt" value="st" checked> «Стрелка»</label> <label><input type="radio" name="mt" value="sm"> Spacematrix</label></div>
+      <div id="ch-mt"></div></div>
+    <div class="card chart"><h3>Плотность застройки: FSI и GSI (Spacematrix)</h3><div class="hint">Каждая точка — квартал с застройкой; цвет — морфотип «Стрелки»</div><div id="ch-sm"></div></div>
+    <div class="card chart"><h3>Доступность с учётом площади, мин</h3><div class="hint">Взвешенное по площади среднее время пешком до остальных кварталов (<code>area_accessibility</code>)</div><div id="ch-acc"></div></div>
+  </div>
+
+  <h2>Школы: обеспеченность местами <span class="est">оценка</span></h2>
+  <div class="grid-charts">
+    <div class="card chart"><h3>Баланс спроса и мест</h3><div class="hint">Модель <code>competitive_provision</code>: 120 мест на 1000 жителей, норматив доступности 15 мин</div><div id="ch-prov"></div>
+      <div class="note">⚠️ Вместимость 41 из 42 школ — оценочная (250 мест, минимальная типовая единица BlocksNet): в OSM нет тега <code>capacity</code>. Реальные школы Пскова крупнее, поэтому дефицит мест завышен.</div></div>
+    <div class="card chart"><h3>Обеспеченность кварталов с населением</h3><div class="hint">Распределение <code>provision_strong</code> (доля спроса, удовлетворённая в пределах 15 мин)</div><div id="ch-provdist"></div></div>
+  </div>
+
+  <h2>Культурное наследие и транспорт</h2>
+  <div class="grid-charts">
+    <div class="card chart"><h3>ОКН по категориям и типам</h3><div class="hint">Точечные объекты в границах Пскова (Фед./Рег./Выявл. — категория значения). Подготовка данных — <b id="author-heritage"></b></div><div id="ch-okn"></div></div>
+    <div class="card chart"><h3>Расстояние от квартала до ближайшей остановки, м</h3><div class="hint">По прямой от репрезентативной точки квартала. Подготовка данных — <b id="author-transport"></b></div><div id="ch-stops"></div></div>
+  </div>
+
+  <h2>Показатели кварталов</h2>
+  <div class="card">
+    <div class="table-tools">
+      <input id="t-search" placeholder="Найти по ID…" inputmode="numeric">
+      <button id="dl-csv">Скачать CSV</button><button id="dl-geojson">Скачать GeoJSON</button>
+      <span class="note" style="margin:0">Таблица учитывает фильтры. Клик по строке — показать квартал на карте.</span>
+    </div>
+    <div class="table-wrap"><table class="data" id="tbl"><thead></thead><tbody></tbody></table></div>
+    <div class="pager"><button id="pg-prev">←</button><span id="pg-info"></span><button id="pg-next">→</button></div>
+  </div>
+
+  <h2>Методика, источники и ограничения</h2>
+  <div class="method">
+    <div class="card">
+      <h3>Источники данных</h3>
+      <ul id="sources"></ul>
+      <h3 style="margin-top:12px">Как получены показатели</h3>
+      <ul>
+        <li>Кварталы нарезаны BlocksNet по улицам, железной дороге и воде (<code>cut_urban_blocks</code>), осколки &lt; 100 м² удалены.</li>
+        <li>Время в пути — пешеходный граф OSM (5 км/ч), матрица <code>calculate_accessibility_matrix</code>.</li>
+        <li>Здания: этажность из <code>building:levels</code>, пропуски — 1 этаж; жилая площадь = 0,9 × поэтажной; население = жилая площадь / 30 м² на человека (<code>impute_buildings</code>).</li>
+        <li>Морфотипы — кластеризация Spacematrix и правила «Стрелки» по FSI, GSI, L, MXI.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Ограничения <span class="est">важно</span></h3>
+      <ul id="limits"></ul>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3>Словарь показателей</h3>
+      <div class="table-wrap"><table class="dict" id="dict"></table></div>
+    </div>
+  </div>
+  <footer id="footer"></footer>
+</main>
+
+<script>
+const DATA = /*__DATA__*/null;
+const S = DATA.summary, T = S.totals;
+const fmt = (v, d = 0) => v === null || v === undefined || Number.isNaN(v) ? '—' :
+  Number(v).toLocaleString('ru-RU', {minimumFractionDigits: d, maximumFractionDigits: d});
+const pct = v => v === null || v === undefined ? '—' : fmt(v * 100, 0) + ' %';
+const median = arr => { const a = arr.filter(v => v !== null && v !== undefined && !Number.isNaN(v)).sort((x, y) => x - y);
+  if (!a.length) return null; const m = Math.floor(a.length / 2); return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; };
+const plural = (n, one, few, many) => { const a = Math.abs(n) % 100, b = a % 10;
+  return a > 10 && a < 20 ? many : b > 1 && b < 5 ? few : b === 1 ? one : many; };
+const nWord = (n, one, few, many) => `${fmt(n)} ${plural(n, one, few, many)}`;
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+
+// ---------- палитры и показатели ----------
+const NONE = 'Не определено';
+const LU_COLORS = {'Жилое': '#f2a541', 'Деловое': '#d1495b', 'Рекреационное': '#5aa469', 'Промышленное': '#7e6bb5',
+  'Транспортное': '#8d99ae', 'Специальное': '#b5838d', 'Сельскохозяйственное': '#c9b458', [NONE]: '#d9d9d9'};
+const CAT_PALETTE = ['#4e79a7', '#f28e2b', '#59a14f', '#e15759', '#76b7b2', '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac', '#86bcb6'];
+const PAL = {
+  YlOrRd: ['#ffffb2', '#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'],
+  Blues: ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c'],
+  Purples: ['#f2f0f7', '#dadaeb', '#bcbddc', '#9e9ac8', '#756bb1', '#54278f'],
+  Greens: ['#edf8e9', '#c7e9c0', '#a1d99b', '#74c476', '#31a354', '#006d2c'],
+  Viridis: ['#fde725', '#7ad151', '#22a884', '#2a788e', '#414487', '#440154'],
+  Oranges: ['#feedde', '#fdd0a2', '#fdae6b', '#fd8d3c', '#e6550d', '#a63603'],
+};
+const INDICATORS = [
+  {key: 'lu', name: 'Землепользование', type: 'cat'},
+  {key: 'pop', name: 'Расчётное население', unit: 'чел.', pal: 'YlOrRd', zero: true, est: true},
+  {key: 'pop_dens', name: 'Плотность населения', unit: 'чел./га', pal: 'YlOrRd', zero: true, est: true, d: 1},
+  {key: 'fsi', name: 'Плотность застройки FSI', unit: 'м²/м²', pal: 'Blues', zero: true, d: 2},
+  {key: 'gsi', name: 'Доля застройки GSI', unit: 'доля', pal: 'Blues', zero: true, d: 2},
+  {key: 'floors', name: 'Средняя этажность L', unit: 'этажей', pal: 'Purples', d: 1},
+  {key: 'mxi', name: 'Доля жилой площади MXI', unit: 'доля', pal: 'Oranges', zero: true, d: 2},
+  {key: 'acc', name: 'Доступность с учётом площади', unit: 'мин', pal: 'Viridis', d: 0},
+  {key: 'prov', name: 'Обеспеченность школами (строгая)', unit: 'доля', type: 'prov', est: true},
+  {key: 'd_left', name: 'Неудовлетворённый спрос на школы', unit: 'мест', pal: 'YlOrRd', zero: true, est: true},
+  {key: 'st', name: 'Морфотип «Стрелки»', type: 'cat'},
+  {key: 'sm', name: 'Морфотип Spacematrix', type: 'cat'},
+  {key: 'okn', name: 'Объекты культурного наследия', unit: 'шт.', pal: 'Purples', zero: true},
+  {key: 'pz', name: 'Доля площади в зонах охраны ОКН', unit: 'доля', pal: 'Purples', zero: true, d: 2},
+  {key: 'stop_m', name: 'Расстояние до ближайшей остановки', unit: 'м', pal: 'Oranges', d: 0},
+];
+const PROV_CLASSES = [[0, 0.2, '#d7191c', '0–20 %'], [0.2, 0.4, '#fdae61', '20–40 %'], [0.4, 0.6, '#ffffbf', '40–60 %'],
+  [0.6, 0.8, '#a6d96a', '60–80 %'], [0.8, 1.0001, '#1a9641', '80–100 %']];
+
+const blocks = DATA.blocks.features;
+const byId = new Map(blocks.map(f => [f.properties.id, f]));
+const CITY_MED = {};
+['area_ha', 'pop', 'pop_dens', 'fsi', 'gsi', 'floors', 'mxi', 'osr', 'acc', 'prov', 'okn', 'stop_m'].forEach(k =>
+  CITY_MED[k] = median(blocks.map(f => f.properties[k])));
+
+const catColor = {};
+function categoryColors(key) {
+  if (key === 'lu') return LU_COLORS;
+  if (!catColor[key]) {
+    const counts = {}; blocks.forEach(f => { const v = f.properties[key]; if (v) counts[v] = (counts[v] || 0) + 1; });
+    const cats = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    catColor[key] = Object.fromEntries(cats.map((c, i) => [c, CAT_PALETTE[i % CAT_PALETTE.length]]));
+    catColor[key][NONE] = '#e6e6e6';
+  }
+  return catColor[key];
+}
+function quantileBreaks(values, n = 6) {
+  const a = values.filter(v => v !== null && v !== undefined).sort((x, y) => x - y);
+  if (!a.length) return [];
+  const br = [];
+  for (let i = 1; i < n; i++) br.push(a[Math.min(a.length - 1, Math.floor(i * a.length / n))]);
+  return [...new Set(br)];
+}
+let scale = null;
+function buildScale(ind) {
+  if (ind.type === 'cat') { const c = categoryColors(ind.key); return {color: v => c[v || NONE] || '#e6e6e6', legend: Object.entries(c)}; }
+  if (ind.type === 'prov') return {color: v => v === null || v === undefined ? '#efefef' :
+      PROV_CLASSES.find(c => v >= c[0] && v < c[1])[2], legend: [...PROV_CLASSES.map(c => [c[3], c[2]]), ['нет населения', '#efefef']]};
+  const vals = blocks.map(f => f.properties[ind.key]);
+  const pos = ind.zero ? vals.filter(v => v > 0) : vals.filter(v => v !== null && v !== undefined);
+  const br = quantileBreaks(pos, PAL[ind.pal].length);
+  const cols = PAL[ind.pal].slice(PAL[ind.pal].length - br.length - 1);
+  const color = v => {
+    if (v === null || v === undefined) return '#efefef';
+    if (ind.zero && v <= 0) return '#f4f4f4';
+    let i = 0; while (i < br.length && v >= br[i]) i++; return cols[i];
+  };
+  const d = ind.d ?? 0, lo = Math.min(...pos), hi = Math.max(...pos);
+  const edges = [lo, ...br, hi];
+  const legend = cols.map((c, i) => [fmt(edges[i], d) === fmt(edges[i + 1], d) ? fmt(edges[i], d) : `${fmt(edges[i], d)} – ${fmt(edges[i + 1], d)}`, c]);
+  if (ind.zero) legend.unshift(['0 / нет', '#f4f4f4']);
+  return {color, legend};
+}
+
+// ---------- фильтры ----------
+const F = {lu: 'all', st: 'all', pop: 'all', okn: 'all'};
+function fillSelect(id, key) {
+  const counts = {}; blocks.forEach(f => { const v = f.properties[key] || NONE; counts[v] = (counts[v] || 0) + 1; });
+  const el = document.getElementById(id);
+  el.innerHTML = '<option value="all">Все</option>' + Object.keys(counts).sort((a, b) => counts[b] - counts[a])
+    .map(v => `<option value="${esc(v)}">${esc(v)} (${counts[v]})</option>`).join('');
+}
+fillSelect('f-lu', 'lu'); fillSelect('f-st', 'st');
+function passes(p) {
+  if (F.lu !== 'all' && (p.lu || NONE) !== F.lu) return false;
+  if (F.st !== 'all' && (p.st || NONE) !== F.st) return false;
+  if (F.pop !== 'all') {
+    const v = p.pop || 0;
+    if (F.pop === '0' && v !== 0) return false;
+    if (F.pop.includes('-')) { const [a, b] = F.pop.split('-').map(Number); if (v < Math.max(a, 1) || (b && v >= b)) return false; }
+  }
+  if (F.okn === 'yes' && !(p.okn > 0)) return false;
+  if (F.okn === 'zone' && !(p.pz > 0.5)) return false;
+  return true;
+}
+const filtered = () => blocks.filter(f => passes(f.properties));
+
+// ---------- KPI ----------
+function renderKpis(list) {
+  const P = list.map(f => f.properties), sum = k => P.reduce((s, p) => s + (p[k] || 0), 0);
+  const area = sum('area_ha'), bfa = sum('bfa'), demand = sum('demand'), within = sum('d_within');
+  const items = [
+    ['Кварталы', fmt(list.length), `из ${fmt(blocks.length)}`],
+    ['Площадь, га', fmt(area, 1), `территория ГО — ${fmt(T.territory_area_ha, 0)} га`],
+    ['Расчётное население<span class="est">оценка</span>', fmt(sum('pop')), `тег OSM: ${fmt(T.population_osm_tag)} чел.`],
+    ['Плотность застройки FSI', fmt(area ? bfa / (area * 1e4) : 0, 2), `GSI ${fmt(area ? sum('footprint') / (area * 1e4) : 0, 3)}`],
+    ['Медиана доступности, мин', fmt(median(P.map(p => p.acc)), 1), `время между кварталами: ${fmt(T.acc_median_min, 0)} мин`],
+    ['Спрос на школы удовлетворён<span class="est">оценка</span>', demand ? pct(within / demand) : '—', `${fmt(within)} из ${fmt(demand)} мест`],
+    ['Объекты наследия', fmt(sum('okn')), `федерального значения: ${fmt(sum('okn_fed'))}, ЮНЕСКО: ${fmt(sum('okn_unesco'))}`],
+  ];
+  document.getElementById('kpis').innerHTML = items.map(([t, v, n]) =>
+    `<div class="kpi"><div class="t">${t}</div><div class="v">${v}</div><div class="n">${n}</div></div>`).join('');
+  document.getElementById('f-count').textContent = `${fmt(list.length)} из ${fmt(blocks.length)} кварталов`;
+}
+
+// ---------- карта ----------
+const map = L.map('map', {preferCanvas: true, zoomSnap: 0.5});
+const esri = (s, a) => L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/${s}/MapServer/tile/{z}/{y}/{x}`,
+  {maxZoom: 19, maxNativeZoom: s.includes('Canvas') ? 16 : 19, attribution: a});
+const ESRI_ATTR = 'Tiles &copy; Esri';
+const bases = {
+  'Esri · светло-серая': esri('Canvas/World_Light_Gray_Base', ESRI_ATTR + ' — Esri, HERE, Garmin, &copy; OpenStreetMap contributors'),
+  'Esri · спутник': esri('World_Imagery', ESRI_ATTR + ' — Esri, Maxar, Earthstar Geographics'),
+  'Esri · топография': esri('World_Topo_Map', ESRI_ATTR + ' — Esri, HERE, Garmin, &copy; OpenStreetMap contributors'),
+  'Esri · улицы': esri('World_Street_Map', ESRI_ATTR + ' — Esri, HERE, Garmin, &copy; OpenStreetMap contributors'),
+  'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'}),
+};
+bases['Esri · светло-серая'].addTo(map);
+L.control.layers(bases, null, {position: 'topright'}).addTo(map);
+L.control.scale({imperial: false}).addTo(map);
+
+L.geoJSON(DATA.boundary, {style: {color: '#13263b', weight: 2, fill: false, dashArray: '4 3'}, interactive: false}).addTo(map);
+let indicator = INDICATORS[0], selectedId = null;
+scale = buildScale(indicator);
+const blockLayer = L.geoJSON(DATA.blocks, {
+  style: f => styleFor(f),
+  onEachFeature: (f, layer) => {
+    layer.on('click', () => selectBlock(f.properties.id, false));
+    layer.bindTooltip(() => tooltipFor(f.properties), {sticky: true});
+  },
+}).addTo(map);
+map.fitBounds(blockLayer.getBounds(), {padding: [10, 10]});
+
+function valueText(p, ind) {
+  const v = p[ind.key];
+  if (ind.type === 'cat') return v || NONE;
+  if (ind.type === 'prov') return v === null || v === undefined ? 'нет населения' : pct(v);
+  return `${fmt(v, ind.d ?? 0)} ${ind.unit}`;
+}
+function tooltipFor(p) { return `<b>Квартал ${p.id}</b><br>${indicator.name}: ${valueText(p, indicator)}`; }
+function styleFor(f) {
+  const p = f.properties, on = passes(p), sel = p.id === selectedId;
+  return {fillColor: scale.color(p[indicator.key]), fillOpacity: on ? 0.82 : 0.08, color: sel ? '#000' : (on ? '#4a4a4a' : '#bbb'),
+    weight: sel ? 2.5 : 0.35, opacity: on ? 0.9 : 0.3};
+}
+const legendCtl = L.control({position: 'bottomleft'});
+legendCtl.onAdd = () => { const d = L.DomUtil.create('div', 'legend'); d.id = 'legend'; return d; };
+legendCtl.addTo(map);
+function renderLegend() {
+  const items = scale.legend.filter(([label]) => indicator.type !== 'cat' || blocks.some(f => (f.properties[indicator.key] || NONE) === label));
+  document.getElementById('legend').innerHTML = `<b>${indicator.name}${indicator.unit && indicator.type !== 'prov' ? ', ' + indicator.unit : ''}${indicator.est ? ' <span class="est">оценка</span>' : ''}</b>` +
+    items.map(([l, c]) => `<div><i style="background:${c}"></i>${esc(l)}</div>`).join('');
+  document.getElementById('map-note').textContent = indicator.type === 'cat' ? 'Категории — по данным BlocksNet.' :
+    indicator.type === 'prov' ? 'Фиксированные классы обеспеченности.' : 'Классы — квантили по кварталам' + (indicator.zero ? ' с ненулевым значением.' : '.');
+}
+const indSel = document.getElementById('indicator');
+indSel.innerHTML = INDICATORS.map((d, i) => `<option value="${i}">${d.name}</option>`).join('');
+indSel.onchange = () => { indicator = INDICATORS[+indSel.value]; scale = buildScale(indicator); blockLayer.setStyle(styleFor); renderLegend(); };
+scale = buildScale(indicator); blockLayer.setStyle(styleFor); renderLegend();
+
+// оверлеи
+const schoolsLayer = L.geoJSON(DATA.schools, {pointToLayer: (f, ll) => L.circleMarker(ll, {radius: 5, color: '#fff', weight: 1.5,
+    fillColor: '#111', fillOpacity: 1}).bindTooltip(`<b>${esc(f.properties.name || 'Школа')}</b><br>Вместимость: ${nWord(f.properties.cap, 'место', 'места', 'мест')}` +
+    (f.properties.est === 'True' || f.properties.est === true ? ' <span class="est">оценка</span>' : ''))});
+const maxLink = Math.max(...DATA.links.features.map(f => f.properties.v));
+const linksLayer = L.geoJSON(DATA.links, {style: f => ({color: '#1f5f99', weight: 0.8 + 4 * f.properties.v / maxLink, opacity: 0.65}),
+  onEachFeature: (f, l) => l.bindTooltip(`Квартал ${f.properties.s} → ${f.properties.t}: ${nWord(f.properties.v, 'ребёнок', 'ребёнка', 'детей')}`)});
+const oknLayer = L.geoJSON(DATA.okn, {pointToLayer: (f, ll) => L.circleMarker(ll, {radius: f.properties.unesco === 'Да' ? 6 : 4,
+    color: '#fff', weight: 1, fillColor: f.properties.cat === 'Федеральный' ? '#7b2d8b' : (f.properties.cat === 'Региональный' ? '#c06c84' : '#f0a6ca'), fillOpacity: 0.95})
+  .bindTooltip(`<b>${esc(f.properties.name)}</b><br>${esc(f.properties.cat)} значения · ${esc(f.properties.type)}` +
+    (f.properties.unesco === 'Да' ? '<br>Объект всемирного наследия ЮНЕСКО' : '') + `<br><small>${esc(f.properties.addr)}</small>`)});
+const zonesLayer = L.geoJSON(DATA.zones, {style: {color: '#7b2d8b', weight: 1, fillColor: '#7b2d8b', fillOpacity: 0.12, dashArray: '3 3'},
+  onEachFeature: (f, l) => l.bindTooltip(`${esc(f.properties.desc)}<br><small>${esc(f.properties.obj)}</small>`)});
+const stopsLayer = L.geoJSON({type: 'FeatureCollection', features: DATA.stops.features.filter(f => f.properties.src !== 'Яндекс.Расписания')},
+  {pointToLayer: (f, ll) => L.circleMarker(ll, {radius: 3, color: '#0b6e4f', weight: 1, fillColor: '#2ec4b6', fillOpacity: 0.9})
+    .bindTooltip(`${esc(f.properties.name || 'Остановка')}<br><small>${esc(f.properties.src)}</small>`)});
+const overlays = {'ov-schools': schoolsLayer, 'ov-links': linksLayer, 'ov-okn': oknLayer, 'ov-zones': zonesLayer, 'ov-stops': stopsLayer};
+Object.entries(overlays).forEach(([id, layer]) => {
+  const cb = document.getElementById(id);
+  const sync = () => cb.checked ? layer.addTo(map) : map.removeLayer(layer);
+  cb.onchange = sync; sync();
+});
+
+// ---------- панель квартала ----------
+function selectBlock(id, zoom = true) {
+  selectedId = id; blockLayer.setStyle(styleFor);
+  const f = byId.get(id); if (!f) return;
+  if (zoom) { const l = blockLayer.getLayers().find(x => x.feature.properties.id === id); if (l) map.fitBounds(l.getBounds(), {maxZoom: 16}); }
+  const p = f.properties;
+  const row = (label, v, k, d = 0, unit = '', est = false) => `<tr><td>${label}${est ? '<span class="est">оц.</span>' : ''}</td><td>${v === null || v === undefined ? '—' : (typeof v === 'number' ? fmt(v, d) : esc(v))}${unit ? ' ' + unit : ''}</td><td>${k && CITY_MED[k] !== null ? 'мед. ' + fmt(CITY_MED[k], d) : ''}</td></tr>`;
+  const shares = [['Жилое', p.lu_res], ['Деловое', p.lu_bus], ['Рекреационное', p.lu_rec], ['Промышленное', p.lu_ind],
+    ['Транспортное', p.lu_tra], ['Специальное', p.lu_spe], ['Сельскохозяйственное', p.lu_agr]].filter(s => s[1] > 0.005);
+  const bar = shares.length ? `<div style="display:flex;height:12px;border-radius:4px;overflow:hidden;margin:4px 0 2px">${shares.map(([n, v]) =>
+    `<div title="${n}: ${pct(v)}" style="width:${v * 100}%;background:${LU_COLORS[n]}"></div>`).join('')}</div>
+    <div class="note" style="margin:0 0 8px">${shares.map(([n, v]) => `${n} ${pct(v)}`).join(' · ')}</div>` : '<div class="note">Функциональные зоны OSM не покрывают квартал</div>';
+  document.getElementById('panel').innerHTML = `<h3>Выбранный квартал</h3><div class="ttl">Квартал ${p.id} · ${esc(p.lu || NONE)}</div>${bar}
+  <table>
+  ${row('Площадь', p.area_ha, 'area_ha', 2, 'га')}
+  ${row('Зданий / жилых', `${fmt(p.bld)} / ${fmt(p.bld_liv)}`)}
+  ${row('Население', p.pop, 'pop', 0, 'чел.', true)}
+  ${row('Плотность населения', p.pop_dens, 'pop_dens', 1, 'чел./га', true)}
+  ${row('Площадь застройки', p.footprint, null, 0, 'м²')}
+  ${row('Поэтажная площадь', p.bfa, null, 0, 'м²', true)}
+  ${row('Жилая / нежилая', `${fmt(p.living)} / ${fmt(p.nonliving)}`, null, 0, 'м²', true)}
+  ${row('FSI', p.fsi, 'fsi', 2)}${row('GSI', p.gsi, 'gsi', 2)}${row('Средняя этажность L', p.floors, 'floors', 1)}${row('MXI', p.mxi, 'mxi', 2)}${row('OSR', p.osr, 'osr', 2)}
+  ${row('Морфотип «Стрелки»', p.st || '—')}${row('Морфотип Spacematrix', p.sm || '—')}
+  ${row('Доступность с учётом площади', p.acc, 'acc', 1, 'мин')}
+  ${row('Школ / мест', `${fmt(p.sch)} / ${fmt(p.sch_cap)}`, null, 0, '', p.sch > 0)}
+  ${row('Спрос на места', p.demand, null, 0, '', true)}
+  ${row('— в норме 15 мин', p.d_within)}${row('— за пределами нормы', p.d_without)}${row('— не удовлетворён', p.d_left)}
+  ${row('Свободных мест в школах квартала', p.cap_left)}
+  ${row('Обеспеченность строгая / мягкая', p.prov === null ? 'нет населения' : `${pct(p.prov)} / ${pct(p.prov_weak)}`, null, 0, '', true)}
+  ${row('ОКН (фед. / ЮНЕСКО)', `${fmt(p.okn)} (${fmt(p.okn_fed)} / ${fmt(p.okn_unesco)})`)}
+  ${row('Доля в зонах охраны', pct(p.pz))}
+  ${row('Остановок / до ближайшей', `${fmt(p.stops)} / ${fmt(p.stop_m)} м`, 'stop_m')}
+  </table><div class="note">«мед.» — медиана по всем кварталам города.</div>`;
+}
+
+// ---------- графики (SVG) ----------
+function svgEl(w, h, inner) { return `<svg viewBox="0 0 ${w} ${h}" role="img">${inner}</svg>`; }
+function barH(el, items, d = 0, unit = '') {
+  const w = 560, rowH = 22, left = 215, h = items.length * rowH + 8, max = Math.max(...items.map(i => i.value), 1);
+  const inner = items.map((it, i) => { const y = 4 + i * rowH, bw = (w - left - 70) * it.value / max;
+    return `<text x="${left - 6}" y="${y + 14}" text-anchor="end">${esc(it.label)}</text>
+      <rect x="${left}" y="${y + 3}" width="${Math.max(bw, 1)}" height="${rowH - 8}" rx="3" fill="${it.color || '#4e79a7'}"><title>${esc(it.label)}: ${fmt(it.value, d)} ${unit}</title></rect>
+      <text x="${left + bw + 5}" y="${y + 14}">${fmt(it.value, d)}</text>`; }).join('');
+  document.getElementById(el).innerHTML = svgEl(w, h, inner);
+}
+function histogram(el, values, bins, color, unitLabel) {
+  const w = 520, h = 210, pad = {l: 40, r: 22, t: 10, b: 34};
+  const v = values.filter(x => x !== null && x !== undefined && isFinite(x)); if (!v.length) { document.getElementById(el).innerHTML = '<div class="note">Нет данных</div>'; return; }
+  const lo = bins ? bins[0] : Math.min(...v), hi = bins ? bins[bins.length - 1] : Math.max(...v);
+  const edges = bins || Array.from({length: 13}, (_, i) => lo + (hi - lo) * i / 12);
+  const counts = edges.slice(0, -1).map((e, i) => v.filter(x => x >= e && (i === edges.length - 2 ? x <= edges[i + 1] : x < edges[i + 1])).length);
+  const maxC = Math.max(...counts, 1), bw = (w - pad.l - pad.r) / counts.length;
+  let inner = counts.map((c, i) => { const bh = (h - pad.t - pad.b) * c / maxC;
+    return `<rect x="${pad.l + i * bw + 1}" y="${h - pad.b - bh}" width="${bw - 2}" height="${bh}" fill="${color}" rx="2"><title>${fmt(edges[i], 0)}–${fmt(edges[i + 1], 0)}: ${c}</title></rect>`; }).join('');
+  inner += edges.map((e, i) => i % 2 ? '' : `<text x="${pad.l + i * bw}" y="${h - pad.b + 14}" text-anchor="middle">${fmt(e, 0)}</text>`).join('');
+  inner += `<text x="${(w + pad.l) / 2}" y="${h - 4}" text-anchor="middle">${unitLabel}</text><text x="4" y="${pad.t + 8}">${maxC}</text>`;
+  inner += `<line x1="${pad.l}" x2="${w - pad.r}" y1="${h - pad.b}" y2="${h - pad.b}" stroke="#999"/>`;
+  const med = median(v);
+  let bi = edges.findIndex((e, i) => i < edges.length - 1 && med >= e && med <= edges[i + 1]); if (bi < 0) bi = 0;
+  const mx = pad.l + (bi + (med - edges[bi]) / ((edges[bi + 1] - edges[bi]) || 1)) * bw;
+  inner += `<line x1="${mx}" x2="${mx}" y1="${pad.t}" y2="${h - pad.b}" stroke="#c0392b" stroke-dasharray="4 3"/><text x="${mx + 4}" y="${pad.t + 10}" fill="#c0392b">медиана ${fmt(med, 0)}</text>`;
+  document.getElementById(el).innerHTML = svgEl(w, h, inner);
+}
+function scatter(el, list) {
+  const w = 520, h = 300, pad = {l: 44, r: 10, t: 10, b: 36};
+  const pts = list.map(f => f.properties).filter(p => p.fsi > 0 && p.gsi > 0);
+  const maxX = Math.max(...pts.map(p => p.gsi), 0.1), maxY = Math.max(...pts.map(p => p.fsi), 0.5);
+  const X = v => pad.l + v / maxX * (w - pad.l - pad.r), Y = v => h - pad.b - v / maxY * (h - pad.t - pad.b);
+  const cols = categoryColors('st');
+  let inner = '';
+  [1, 2, 4, 8].forEach(Lv => { const x2 = Math.min(maxX, maxY / Lv);
+    inner += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(x2)}" y2="${Y(x2 * Lv)}" stroke="#ccc" stroke-dasharray="3 3"/><text x="${X(x2) - 2}" y="${Y(x2 * Lv) - 3}" text-anchor="end" fill="#999">L=${Lv}</text>`; });
+  inner += pts.map(p => `<circle cx="${X(p.gsi)}" cy="${Y(p.fsi)}" r="3" fill="${cols[p.st || NONE] || '#bbb'}" fill-opacity=".75"><title>Квартал ${p.id}: FSI ${fmt(p.fsi, 2)}, GSI ${fmt(p.gsi, 2)}, ${esc(p.st || '')}</title></circle>`).join('');
+  inner += `<line x1="${pad.l}" x2="${w - pad.r}" y1="${h - pad.b}" y2="${h - pad.b}" stroke="#999"/><line x1="${pad.l}" x2="${pad.l}" y1="${pad.t}" y2="${h - pad.b}" stroke="#999"/>`;
+  for (let i = 0; i <= 4; i++) { inner += `<text x="${X(maxX * i / 4)}" y="${h - pad.b + 14}" text-anchor="middle">${fmt(maxX * i / 4, 2)}</text><text x="${pad.l - 4}" y="${Y(maxY * i / 4) + 4}" text-anchor="end">${fmt(maxY * i / 4, 1)}</text>`; }
+  inner += `<text x="${(w + pad.l) / 2}" y="${h - 4}" text-anchor="middle">GSI — доля застройки</text><text x="12" y="${pad.t + 4}" transform="rotate(-90 12 ${pad.t + 4})" text-anchor="end">FSI, м²/м²</text>`;
+  document.getElementById(el).innerHTML = svgEl(w, h, inner);
+}
+function countBy(list, key, valueKey = null) {
+  const m = {}; list.forEach(f => { const v = f.properties[key] || NONE; m[v] = (m[v] || 0) + (valueKey ? f.properties[valueKey] || 0 : 1); });
+  return Object.entries(m).sort((a, b) => b[1] - a[1]);
+}
+let mtKey = 'st';
+document.querySelectorAll('input[name=mt]').forEach(r => r.onchange = () => { mtKey = r.value; renderCharts(filtered()); });
+function renderCharts(list) {
+  barH('ch-lu', countBy(list, 'lu', 'area_ha').map(([k, v]) => ({label: k, value: v, color: LU_COLORS[k]})), 1, 'га');
+  const mc = categoryColors(mtKey);
+  barH('ch-mt', countBy(list, mtKey).filter(([k]) => k !== NONE).map(([k, v]) => ({label: k.length > 34 ? k.slice(0, 33) + '…' : k, value: v, color: mc[k]})));
+  scatter('ch-sm', list);
+  histogram('ch-acc', list.map(f => f.properties.acc), null, '#2a788e', 'мин');
+  const P = list.map(f => f.properties), sum = k => P.reduce((s, p) => s + (p[k] || 0), 0);
+  barH('ch-prov', [
+    {label: 'Спрос (дети)', value: sum('demand'), color: '#8d99ae'},
+    {label: 'Мест в школах', value: sum('sch_cap'), color: '#4e79a7'},
+    {label: 'Удовлетворено в 15 мин', value: sum('d_within'), color: '#1a9641'},
+    {label: 'Удовлетворено дальше', value: sum('d_without'), color: '#a6d96a'},
+    {label: 'Не удовлетворено', value: sum('d_left'), color: '#d7191c'},
+    {label: 'Свободных мест', value: sum('cap_left'), color: '#76b7b2'},
+  ]);
+  const withPop = P.filter(p => p.prov !== null && p.prov !== undefined);
+  barH('ch-provdist', PROV_CLASSES.map(c => ({label: c[3], value: withPop.filter(p => p.prov >= c[0] && p.prov < c[1]).length, color: c[2]})));
+  histogram('ch-stops', P.map(p => p.stop_m), [0, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000, 4000], '#2ec4b6', 'м (классы неравные)');
+}
+// ОКН — по всему городу (не зависит от фильтров кварталов)
+(function renderOkn() {
+  const SHORT = {'Федеральный': 'Фед.', 'Региональный': 'Рег.', 'Выявленный': 'Выявл.'};
+  const c = {}; DATA.okn.features.forEach(f => { const k = `${SHORT[f.properties.cat] || '—'} · ${f.properties.type || '—'}`; c[k] = (c[k] || 0) + 1; });
+  const col = k => k.startsWith('Фед.') ? '#7b2d8b' : k.startsWith('Рег.') ? '#c06c84' : '#f0a6ca';
+  barH('ch-okn', Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, v]) => ({label: k.length > 34 ? k.slice(0, 33) + '…' : k, value: v, color: col(k)})));
+})();
+
+// ---------- таблица ----------
+const COLS = [['id', 'ID', 0], ['lu', 'Землепольз.', null], ['area_ha', 'Площадь, га', 2], ['pop', 'Население*', 0], ['pop_dens', 'чел./га*', 1],
+  ['fsi', 'FSI', 2], ['gsi', 'GSI', 2], ['floors', 'L, эт.', 1], ['acc', 'Доступн., мин', 1], ['prov', 'Обесп. школ*', 2], ['st', 'Морфотип «Стрелки»', null], ['okn', 'ОКН', 0]];
+let sortKey = 'id', sortDir = 1, page = 0; const PAGE = 10;
+const thead = document.querySelector('#tbl thead');
+thead.innerHTML = '<tr>' + COLS.map(([k, n]) => `<th data-k="${k}">${n}</th>`).join('') + '</tr>';
+thead.querySelectorAll('th').forEach(th => th.onclick = () => { const k = th.dataset.k; sortDir = sortKey === k ? -sortDir : (k === 'id' || k === 'lu' || k === 'st' ? 1 : -1); sortKey = k; page = 0; renderTable(filtered()); });
+function tableRows(list) {
+  const q = document.getElementById('t-search').value.trim();
+  let rows = list.map(f => f.properties);
+  if (q) rows = rows.filter(p => String(p.id).startsWith(q));
+  rows.sort((a, b) => { const x = a[sortKey], y = b[sortKey];
+    if (x === null || x === undefined) return 1; if (y === null || y === undefined) return -1;
+    return (typeof x === 'string' ? x.localeCompare(y, 'ru') : x - y) * sortDir; });
+  return rows;
+}
+function renderTable(list) {
+  const rows = tableRows(list), pages = Math.max(1, Math.ceil(rows.length / PAGE)); page = Math.min(page, pages - 1);
+  document.querySelector('#tbl tbody').innerHTML = rows.slice(page * PAGE, page * PAGE + PAGE).map(p =>
+    `<tr data-id="${p.id}">${COLS.map(([k, , d]) => `<td>${d === null ? esc(p[k] || NONE) : (k === 'prov' && (p[k] === null || p[k] === undefined) ? '—' : fmt(p[k], d))}</td>`).join('')}</tr>`).join('');
+  document.querySelectorAll('#tbl tbody tr').forEach(tr => tr.onclick = () => { selectBlock(+tr.dataset.id); document.getElementById('map').scrollIntoView({behavior: 'smooth', block: 'center'}); });
+  thead.querySelectorAll('th').forEach(th => th.textContent = COLS.find(c => c[0] === th.dataset.k)[1] + (th.dataset.k === sortKey ? (sortDir > 0 ? ' ↑' : ' ↓') : ''));
+  document.getElementById('pg-info').textContent = `${rows.length ? page * PAGE + 1 : 0}–${Math.min(rows.length, page * PAGE + PAGE)} из ${rows.length} · стр. ${page + 1} из ${pages}`;
+}
+document.getElementById('pg-prev').onclick = () => { if (page > 0) { page--; renderTable(filtered()); } };
+document.getElementById('pg-next').onclick = () => { page++; renderTable(filtered()); };
+document.getElementById('t-search').oninput = () => { page = 0; renderTable(filtered()); };
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+document.getElementById('dl-csv').onclick = () => {
+  const list = filtered(), keys = Object.keys(list[0]?.properties || {});
+  const csv = [keys.join(';'), ...list.map(f => keys.map(k => { const v = f.properties[k]; return v === null || v === undefined ? '' : String(v).replace(/;/g, ','); }).join(';'))].join('\n');
+  download('pskov_blocks.csv', '﻿' + csv, 'text/csv;charset=utf-8');
+};
+document.getElementById('dl-geojson').onclick = () => download('pskov_blocks.geojson', JSON.stringify({type: 'FeatureCollection', features: filtered()}), 'application/geo+json');
+
+// ---------- методика ----------
+const A = S.authors || {};
+document.getElementById('author-heritage').textContent = A.heritage || '';
+document.getElementById('author-transport').textContent = A.transport || '';
+document.getElementById('subtitle').textContent = `${S.territory}, ${S.region} · ${nWord(T.blocks, 'квартал', 'квартала', 'кварталов')} · BlocksNet ${S.blocksnet_version} · пешеходная сеть ${fmt(S.walk_speed_kmh)} км/ч · сборка ${DATA.built}`;
+document.getElementById('sources').innerHTML = [
+  `<b>OpenStreetMap</b> — дороги, ж/д, вода, функциональные зоны (<code>landuse</code>), ${nWord(T.buildings, 'здание', 'здания', 'зданий')}, ${nWord(T.schools, 'школа', 'школы', 'школ')}, пешеходный граф. Выгрузка Псковской области (<code>pskov_oblast.pbf</code>), © участники OpenStreetMap, ODbL.`,
+  `<b>Граница городского округа Псков</b> — административная граница OSM.`,
+  `<b>Объекты культурного наследия и зоны охраны</b> — ЕГРОКН и данные регионального органа охраны ОКН; ${nWord(T.okn_points, 'точечный объект', 'точечных объекта', 'точечных объектов')}, ${nWord(T.protection_zones, 'зона охраны', 'зоны охраны', 'зон охраны')}. Подготовка — ${esc(A.heritage)}.`,
+  `<b>Остановки общественного транспорта</b> — OSM (<code>highway=bus_stop</code>), Яндекс.Расписания, ж/д платформы; ${nWord(T.stops, 'остановка', 'остановки', 'остановок')}. Подготовка — ${esc(A.transport)}.`,
+  `<b>Нормативы BlocksNet</b> — школа: ${S.params.school_demand_per_1000} мест на 1000 жителей, доступность ${S.params.school_accessibility_min} мин, типовая вместимость ${S.params.school_default_capacity} мест.`,
+  `<b>Подложки</b> — Esri (World Light Gray, World Imagery, World Topo, World Street), OpenStreetMap.`,
+].map(s => `<li>${s}</li>`).join('');
+document.getElementById('limits').innerHTML = [
+  `<b>Население — оценка модели.</b> Этажность указана лишь у ${pct(T.floors_known_share)} зданий (остальным — 1 этаж); жилыми считаются только здания с явным жилым тегом (${fmt(T.living_buildings)} из ${fmt(T.buildings)}), у большинства зданий тег <code>building=yes</code>. Итог ${fmt(T.population)} чел. против ${fmt(T.population_osm_tag)} в теге OSM — близко в целом, но по кварталам возможны большие ошибки.`,
+  `<b>Вместимость школ — оценочная</b> у ${T.schools_capacity_estimated} из ${T.schools} школ (по 250 мест). Поэтому доля удовлетворённого спроса (${pct(T.school_demand_within / T.school_demand)}) — нижняя граница, а не реальный дефицит.`,
+  `<b>Доступность — только пешком</b> (5 км/ч, без общественного транспорта и без учёта рельефа и переходов). Время до центроида квартала включает подход от ближайшего узла графа.`,
+  `<b>Функциональные зоны OSM неполные</b>: ${nWord(blocks.filter(f => !f.properties.lu).length, 'квартал', 'квартала', 'кварталов')} без преобладающей функции («Не определено»).`,
+  `<b>Кварталы</b> на окраинах крупные (леса, поля, промзоны), поэтому средние по ним плотности занижены.`,
+  `<b>ОКН</b> учтены точками: протяжённые объекты (крепостные стены, ансамбли) попадают в один квартал. Остановки — по прямой, без маршрутов и расписаний.`,
+].map(s => `<li>${s}</li>`).join('');
+document.getElementById('dict').innerHTML = '<tr><th>Показатель</th><th>Единицы</th><th>Как считается</th><th>Функция BlocksNet</th></tr>' + [
+  ['Преобладающая функция, доли функций', 'категория, доля', 'пересечение квартала со слоем landuse по правилам соответствия', 'assign_land_use'],
+  ['Время в пути между кварталами', 'мин', 'кратчайший путь по пешеходному графу между репрезентативными точками', 'calculate_accessibility_matrix'],
+  ['Население', 'чел.', 'жилая площадь / 30 м²', 'impute_buildings, aggregate_objects'],
+  ['Плотность населения', 'чел./га', 'население / площадь квартала', '— (расчёт проекта)'],
+  ['FSI', 'м²/м²', 'поэтажная площадь / площадь квартала', 'calculate_density_indicators'],
+  ['GSI', 'доля', 'площадь застройки / площадь квартала', 'calculate_density_indicators'],
+  ['L', 'этажей', 'FSI / GSI — средняя этажность', 'calculate_density_indicators'],
+  ['OSR', 'м²/м²', '(1 − GSI) / FSI — открытое пространство на 1 м² поэтажной площади', 'calculate_density_indicators'],
+  ['MXI', 'доля', 'жилая площадь / поэтажная площадь', 'calculate_density_indicators'],
+  ['Морфотип Spacematrix', 'категория', 'кластеризация по FSI, L, MXI с интерпретацией', 'get_spacematrix_morphotypes'],
+  ['Морфотип «Стрелки»', 'категория', 'правила по этажности и плотности', 'get_strelka_morphotypes'],
+  ['Школы, вместимость', 'шт., мест', 'объекты amenity=school; пропуски вместимости — 250', 'impute_services, aggregate_objects'],
+  ['Спрос, удовлетворённый / неудовлетворённый, остаток мест', 'мест', 'линейная оптимизация распределения детей по школам', 'competitive_provision'],
+  ['Обеспеченность строгая / мягкая', 'доля 0–1', 'доля спроса, удовлетворённого в норме доступности / с учётом дальних мест', 'competitive_provision'],
+  ['Доступность с учётом площади', 'мин', 'среднее время до всех кварталов, взвешенное по их площади', 'area_accessibility'],
+  ['ОКН, доля в зонах охраны, остановки', 'шт., доля, м', 'пространственные пересечения и ближайший сосед', '— (расчёт проекта)'],
+].map(r => `<tr>${r.map((c, i) => `<td>${i === 3 ? `<code>${esc(c)}</code>` : esc(c)}</td>`).join('')}</tr>`).join('');
+document.getElementById('footer').innerHTML = `Практика 2 «Технологии ИИ в урбанистике», ИДУ ИТМО · Яковлев Д. А., Цыганов В. А., C4107 · Данные: © участники OpenStreetMap (ODbL); ОКН — ${esc(A.heritage)}; транспорт — ${esc(A.transport)} · Страница собрана скриптом <code>scripts/build_dashboard.py</code> из <code>data/results/*.geojson</code>.`;
+
+// ---------- обновление ----------
+function refresh() { const list = filtered(); renderKpis(list); renderCharts(list); renderTable(list); blockLayer.setStyle(styleFor); }
+[['f-lu', 'lu'], ['f-st', 'st'], ['f-pop', 'pop'], ['f-okn', 'okn']].forEach(([id, k]) => document.getElementById(id).onchange = e => { F[k] = e.target.value; page = 0; refresh(); });
+document.getElementById('f-reset').onclick = () => { Object.keys(F).forEach(k => F[k] = 'all'); ['f-lu', 'f-st', 'f-pop', 'f-okn'].forEach(id => document.getElementById(id).value = 'all'); refresh(); };
+refresh();
+</script>
+</body>
+</html>

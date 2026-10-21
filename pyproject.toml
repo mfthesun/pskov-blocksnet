@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=64.0", "setuptools_scm[toml]>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pskov_blocksnet"
+version = "0.2.0"
+authors = [
+    { name = "Denis Yakovlev", email = "mfthesun@vivaldi.net" },
+    { name = "Viktor Tsyganov" },
+]
+description = "Квартальная модель г. Пскова на BlocksNet и интерактивный дашборд (практика 2, ИДУ ИТМО)"
+readme = "README.md"
+# iduedu==0.4.1 (зависимость blocksnet 1.0.0a9) поддерживает Python 3.10–3.12
+requires-python = ">=3.10,<3.13"
+license = { text = "BSD-3-Clause" }
+
+dependencies = [
+    "blocksnet[ipynb,torch]==1.0.0a9", # расчёты; extra torch нужен уже для нарезки кварталов
+    "geopandas>=1.0.0,<2.0.0",
+    "pyogrio>=0.9",                    # быстрый ввод-вывод GeoJSON
+    "pyrosm>=0.6.2",                   # офлайн-чтение OSM из pskov_oblast.pbf (prepare_data, граф)
+    "loguru>=0.7.0,<1.0.0",
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: Russian",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter",
+    "ipykernel",
+    "nbconvert",
+    "black[jupyter]==24.10.0",
+    "isort==5.13.2",
+]
+tests = ["pytest>=7.0.0,<9.0.0"]
+
+[project.urls]
+"Repository" = "https://github.com/mfthesun/pskov-blocksnet"
+"Задание" = "https://mvin8.github.io/ai-technologies-in-urbanism/content/practice/practice-02.html"
+"BlocksNet" = "https://github.com/aimclub/blocksnet"
+
+[tool.setuptools.packages.find]
+include = ["pskov_blocksnet*"]
+
+[tool.setuptools.package-data]
+pskov_blocksnet = ["dashboard/*.html", "dashboard/vendor/*"]
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

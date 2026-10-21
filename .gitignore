@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+
+# Окружения и секреты — не публиковать
+.venv/
+venv/
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Тяжёлые и промежуточные данные
+data/cache/
+*.pbf
+*.osm
+*.pickle
+*.parquet
+
+# Claude Code: локальные настройки пользователя
+.claude/settings.local.json
+
+# Системное
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
