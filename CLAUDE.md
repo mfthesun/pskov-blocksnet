@@ -42,8 +42,8 @@ scripts/build_dashboard.py        data/results  ->  dashboard.html              
 
 * Python **3.10–3.12** (iduedu 0.4.1 не ставится на 3.13+). Создание: `make venv && source .venv/bin/activate && make install`.
 * BlocksNet импортирует `torch` уже при `from blocksnet.blocks.cutting import ...` → нужен extra `[torch]`.
-* Путь к `pskov_oblast.pbf` — переменная `PSKOV_PBF` (по умолчанию папка PSKOKN в `~/Claude/...`), нужен только
-  для `prepare_data.py` и для построения графа без кэша.
+* Пешеходный граф строится из `data/osm/pskov_city.osm.pbf` (вырезка по городу, лежит в git; переопределить — `PSKOV_PBF`).
+  Региональный `pskov_oblast.pbf` нужен только `prepare_data.py`.
 
 ## Где что лежит
 

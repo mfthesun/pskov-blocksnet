@@ -13,7 +13,7 @@ description = "Квартальная модель г. Пскова на BlocksN
 readme = "README.md"
 # iduedu==0.4.1 (зависимость blocksnet 1.0.0a9) поддерживает Python 3.10–3.12
 requires-python = ">=3.10,<3.13"
-license = { text = "BSD-3-Clause" }
+license = { file = "LICENSE" }
 
 dependencies = [
     "blocksnet[ipynb,torch]==1.0.0a9", # расчёты; extra torch нужен уже для нарезки кварталов

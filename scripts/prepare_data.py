@@ -3,8 +3,9 @@
 Что делает:
   1. Граница городского округа Псков -> data/input/boundary.geojson
   2. Слои OSM из pskov_oblast.pbf (дороги, ж/д, вода, landuse, здания, школы) -> data/osm/*.geojson
-  3. ОКН и зоны охраны (подготовка: Денис Яковлев), обрезка по Пскову -> data/input/heritage_*.geojson
+  3. ОКН и зоны охраны — материалы по обоснованию СТП Псковской области 2025 г. (подготовка: Денис Яковлев) -> data/input/heritage_*.geojson
   4. Остановки общественного транспорта (подготовка: Виктор Цыганов) -> data/input/transport_stops.geojson
+  5. Вырезка OSM по Пскову для пешеходного графа -> data/osm/pskov_city.osm.pbf (нужен osmium-tool)
 
 Запуск (из корня репозитория, с активированным .venv):
     python scripts/prepare_data.py --source "<папка PSKOKN>" [--pbf <путь к pskov_oblast.pbf>]
@@ -114,6 +115,24 @@ def load_transport(source: Path, boundary: gpd.GeoDataFrame) -> gpd.GeoDataFrame
     return stops
 
 
+def extract_city_pbf(pbf: Path, boundary: gpd.GeoDataFrame, buffer_m: float = 1500) -> None:
+    """Вырезка PBF по границе города с буфером (граф строится с буфером 1 км) через osmium-tool."""
+    import shutil
+    import subprocess
+    import tempfile
+
+    if shutil.which("osmium") is None:
+        logger.warning("osmium-tool не найден (sudo apt install osmium-tool) — вырезка PBF пропущена")
+        return
+    area = boundary.to_crs(config.LOCAL_CRS).buffer(buffer_m).to_crs(4326)
+    with tempfile.TemporaryDirectory() as tmp:
+        poly = Path(tmp) / "area.geojson"
+        gpd.GeoDataFrame(geometry=area).to_file(poly, driver="GeoJSON")
+        subprocess.run(["osmium", "extract", "-p", str(poly), "--strategy", "complete_ways", "--set-bounds",
+                        "-O", "-o", str(config.CITY_PBF), str(pbf)], check=True)
+    logger.info(f"Вырезка PBF: {config.CITY_PBF} ({config.CITY_PBF.stat().st_size / 1e6:.1f} МБ)")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE, help="папка PSKOKN с исходными данными")
@@ -130,6 +149,7 @@ def main() -> None:
 
     write_geojson(load_transport(args.source, boundary), config.INPUT_DIR / "transport_stops.geojson")
 
+    extract_city_pbf(pbf, boundary)
     layers = extract_layers(pbf, boundary)
     layers["schools"] = clean_schools(layers["schools"])
     for name, gdf in layers.items():

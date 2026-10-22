@@ -56,9 +56,8 @@ make check
 или откройте ноутбук в VS Code / Jupyter и выполните ячейки по порядку (на 🛑 стоп-точках проверьте карты).
 
 * Граф и матрица доступности кэшируются в `data/cache/` (в git не попадает). Чтобы посчитать заново — `make clean-cache`.
-* Без кэша нужен `pskov_oblast.pbf`. По умолчанию путь —
-  `~/Claude/ИИ, анализ данных и моделирование в урбанистике/PSKOKN/данные и материалы/pskov_oblast.pbf`;
-  другой путь: `export PSKOV_PBF=/путь/к/pskov_oblast.pbf` (Windows: `$env:PSKOV_PBF="C:\...\pskov_oblast.pbf"`).
+* Без кэша граф строится из `data/osm/pskov_city.osm.pbf` — файл в репозитории, интернет не нужен.
+  Другой PBF: `export PSKOV_PBF=/путь/к/файлу.pbf` (Windows: `$env:PSKOV_PBF="C:\...\файл.pbf"`).
 
 ### Онлайн-режим (как в pipeline.ipynb)
 
@@ -71,7 +70,7 @@ make check
 Только если обновились исходники (новая выгрузка OSM, новая версия реестра ОКН):
 
 ```bash
-python scripts/prepare_data.py --source "<папка PSKOKN>" [--pbf <путь к pskov_oblast.pbf>]
+python scripts/prepare_data.py --source "<папка PSKOKN>" [--pbf <путь к pskov_oblast.pbf>]   # нужен osmium-tool для вырезки
 ```
 
 ## 5. Через Claude Code
@@ -88,6 +87,6 @@ claude                      # в корне репозитория; CLAUDE.md п
 |---|---|
 | `No matching distribution found for iduedu==0.4.1` | Python 3.13+ → создайте окружение на 3.12 |
 | `ModuleNotFoundError: No module named 'torch'` | не установлен extra: `pip install "blocksnet[torch]==1.0.0a9"` |
-| `File does not exist: ...pskov_oblast.pbf` | нет кэша и неверный путь к PBF → задайте `PSKOV_PBF` |
+| `File does not exist: ...pbf` | нет `data/osm/pskov_city.osm.pbf` (удалён) или неверный `PSKOV_PBF` |
 | Segmentation fault в `calculate_accessibility_matrix` | граф с OSM-id узлов → используйте `build_walk_graph` (перенумеровывает узлы) |
 | Пустая карта в `dashboard.html` | подложки грузятся из интернета; кварталы видны и без подложки |

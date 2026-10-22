@@ -19,6 +19,7 @@ venv/
 # Тяжёлые и промежуточные данные
 data/cache/
 *.pbf
+!data/osm/pskov_city.osm.pbf
 *.osm
 *.pickle
 *.parquet

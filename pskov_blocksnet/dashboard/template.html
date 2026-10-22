@@ -537,7 +537,7 @@ document.getElementById('subtitle').textContent = `${S.territory}, ${S.region} �
 document.getElementById('sources').innerHTML = [
   `<b>OpenStreetMap</b> — дороги, ж/д, вода, функциональные зоны (<code>landuse</code>), ${nWord(T.buildings, 'здание', 'здания', 'зданий')}, ${nWord(T.schools, 'школа', 'школы', 'школ')}, пешеходный граф. Выгрузка Псковской области (<code>pskov_oblast.pbf</code>), © участники OpenStreetMap, ODbL.`,
   `<b>Граница городского округа Псков</b> — административная граница OSM.`,
-  `<b>Объекты культурного наследия и зоны охраны</b> — ЕГРОКН и данные регионального органа охраны ОКН; ${nWord(T.okn_points, 'точечный объект', 'точечных объекта', 'точечных объектов')}, ${nWord(T.protection_zones, 'зона охраны', 'зоны охраны', 'зон охраны')}. Подготовка — ${esc(A.heritage)}.`,
+  `<b>Объекты культурного наследия и зоны охраны</b> — материалы по обоснованию схемы территориального планирования (СТП) Псковской области 2025 г.; ${nWord(T.okn_points, 'точечный объект', 'точечных объекта', 'точечных объектов')}, ${nWord(T.protection_zones, 'зона охраны', 'зоны охраны', 'зон охраны')}. Подготовка — ${esc(A.heritage)}.`,
   `<b>Остановки общественного транспорта</b> — OSM (<code>highway=bus_stop</code>), Яндекс.Расписания, ж/д платформы; ${nWord(T.stops, 'остановка', 'остановки', 'остановок')}. Подготовка — ${esc(A.transport)}.`,
   `<b>Нормативы BlocksNet</b> — школа: ${S.params.school_demand_per_1000} мест на 1000 жителей, доступность ${S.params.school_accessibility_min} мин, типовая вместимость ${S.params.school_default_capacity} мест.`,
   `<b>Подложки</b> — Esri (World Light Gray, World Imagery, World Topo, World Street), OpenStreetMap.`,
