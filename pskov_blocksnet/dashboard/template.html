@@ -348,10 +348,24 @@ function styleFor(f) {
 const legendCtl = L.control({position: 'bottomleft'});
 legendCtl.onAdd = () => { const d = L.DomUtil.create('div', 'legend'); d.id = 'legend'; return d; };
 legendCtl.addTo(map);
+// условные обозначения включённых слоёв-оверлеев
+const dot = (c, r = 10, border = '#fff') => `<i style="background:${c};border-radius:50%;width:${r}px;height:${r}px;border:1.5px solid ${border}"></i>`;
+function overlayLegend() {
+  const on = id => document.getElementById(id)?.checked;
+  const rows = [];
+  if (on('ov-schools')) rows.push(`${dot('#111')}школа (вместимость — в подсказке, 41 из 42 <span class="est">оценка</span>)`);
+  if (on('ov-links')) rows.push(`<i style="background:#1f5f99;height:4px;vertical-align:3px"></i>поток детей к школе; толщина ~ число детей`);
+  if (on('ov-okn')) rows.push(`${dot('#7b2d8b')}ОКН федерального значения`, `${dot('#c06c84')}ОКН регионального значения`,
+    `${dot('#f0a6ca')}выявленный ОКН`, `<span style="font-size:11px;color:#5f6b7a">крупная точка — объект ЮНЕСКО</span>`);
+  if (on('ov-zones')) rows.push(`<i style="background:rgba(123,45,139,.15);border:1px dashed #7b2d8b"></i>зона охраны ОКН`);
+  if (on('ov-stops')) rows.push(`${dot('#2ec4b6', 8, '#0b6e4f')}остановка общественного транспорта`);
+  rows.push(`<i style="background:none;border:2px dashed #13263b;height:0;vertical-align:4px"></i>граница городского округа`);
+  return `<b style="margin-top:6px">Слои</b>` + rows.map(r => `<div>${r}</div>`).join('');
+}
 function renderLegend() {
   const items = scale.legend.filter(([label]) => indicator.type !== 'cat' || blocks.some(f => (f.properties[indicator.key] || NONE) === label));
   document.getElementById('legend').innerHTML = `<b>${indicator.name}${indicator.unit && indicator.type !== 'prov' ? ', ' + indicator.unit : ''}${indicator.est ? ' <span class="est">оценка</span>' : ''}</b>` +
-    items.map(([l, c]) => `<div><i style="background:${c}"></i>${esc(l)}</div>`).join('');
+    items.map(([l, c]) => `<div><i style="background:${c}"></i>${esc(l)}</div>`).join('') + overlayLegend();
   document.getElementById('map-note').textContent = indicator.type === 'cat' ? 'Категории — по данным BlocksNet.' :
     indicator.type === 'prov' ? 'Фиксированные классы обеспеченности.' : 'Классы — квантили по кварталам' + (indicator.zero ? ' с ненулевым значением.' : '.');
 }
@@ -380,7 +394,7 @@ const overlays = {'ov-schools': schoolsLayer, 'ov-links': linksLayer, 'ov-okn': 
 Object.entries(overlays).forEach(([id, layer]) => {
   const cb = document.getElementById(id);
   const sync = () => cb.checked ? layer.addTo(map) : map.removeLayer(layer);
-  cb.onchange = sync; sync();
+  cb.onchange = () => { sync(); renderLegend(); }; sync();
 });
 
 // ---------- панель квартала ----------
