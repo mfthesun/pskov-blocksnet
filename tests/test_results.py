@@ -77,6 +77,14 @@ def test_notebook_computes_fields():
         assert fn in code, f"в ноутбуке нет вызова {fn}"
 
 
+def test_notebook_has_required_sections():
+    nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
+    md = "\n".join("".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "markdown")
+    for title in ["## План работы", "## 16. Выводы", "Основные запросы", "Как запустить повторно", "СТОП-ТОЧКА 2"]:
+        assert title in md, f"в ноутбуке нет раздела «{title}»"
+    assert "17.06.2026" in md, "не указана дата данных OSM"
+
+
 def test_dashboard_builds(tmp_path):
     out = tmp_path / "dashboard.html"
     subprocess.run([sys.executable, str(BUILD), "-o", str(out)], check=True, cwd=ROOT)
@@ -84,3 +92,6 @@ def test_dashboard_builds(tmp_path):
     assert "/*__DATA__*/" not in html and "L.map(" in html
     assert "carto" not in html.lower(), "подложки CARTO не используем"
     assert "Виктор Цыганов" in html and "Денис Яковлев" in html
+    assert 'id="findings"' in html and "Псков — преимущественно жилой" in html, "на странице нет выводов"
+    assert '"sm_groups":[{' in html, "на странице нет характеристик групп Spacematrix"
+    assert '"osm_date":"17.06.2026"' in html, "на странице нет даты данных"

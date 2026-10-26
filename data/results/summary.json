@@ -6,6 +6,7 @@
   "data_mode": "pbf",
   "graph_type": "walk",
   "walk_speed_kmh": 5.0,
+  "osm_date": "17.06.2026",
   "blocksnet_version": "1.0.0a9",
   "totals": {
     "blocks": 902,

@@ -109,6 +109,56 @@ def leaflet_css() -> str:
     return css
 
 
+def findings_html(path: Path) -> str:
+    """Выводы для страницы берутся из docs/findings.md (один источник текста с ноутбуком)."""
+    import html
+    import re
+
+    if not path.exists():
+        return ""
+    items, limits, cur = [], "", None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("#") and (items or limits):
+            break  # дальше — служебные разделы файла («Как проверить выводы самому»)
+        if re.match(r"^\d+\.\s", line):
+            cur = [re.sub(r"^\d+\.\s+", "", line)]
+            items.append(cur)
+        elif cur is not None and line.startswith("   ") and line.strip():
+            cur.append(line.strip())
+        elif line.startswith("**Ограничения"):
+            limits, cur = line, None
+        elif limits and line.strip() and not line.startswith("#"):
+            limits += " " + line.strip()
+        else:
+            cur = None if not line.strip() else cur
+
+    def md(text: str) -> str:
+        text = html.escape(text)
+        text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+        return re.sub(r"`(.+?)`", r"<code>\1</code>", text)
+
+    out = "<ol>" + "".join(f"<li>{md(' '.join(i))}</li>" for i in items) + "</ol>"
+    if limits:
+        out += f"<p class='note'>{md(limits)}</p>"
+    return out
+
+
+def spacematrix_groups(blocks: gpd.GeoDataFrame, summary: dict) -> list[dict]:
+    """Характеристики групп Spacematrix: центры кластеров (summary.json) + число кварталов и жителей."""
+    centers = {int(c["cluster"]): c for c in summary.get("spacematrix_clusters", [])}
+    b = blocks.dropna(subset=["spacematrix_cluster"])
+    rows = []
+    for cl, grp in b.groupby(b["spacematrix_cluster"].astype(int)):
+        c = centers.get(cl, {})
+        fsi, l_ = c.get("fsi"), c.get("l")
+        rows.append({
+            "cluster": cl, "name": spacematrix_ru(c.get("morphotype")) or "—", "blocks": int(len(grp)),
+            "pop": int(grp["population"].sum()), "fsi": clean(fsi, 2), "l": clean(l_, 1),
+            "gsi": clean(fsi / l_ if fsi and l_ else None, 2), "mxi": clean(c.get("mxi"), 2),
+        })
+    return sorted(rows, key=lambda r: -r["blocks"])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-o", "--output", type=Path, default=config.DASHBOARD_PATH)
@@ -117,6 +167,7 @@ def main() -> None:
 
     summary = json.loads((R / "summary.json").read_text(encoding="utf-8"))
     blocks = gpd.read_file(R / "blocks.geojson")
+    sm_groups = spacematrix_groups(blocks, summary)
     blocks["land_use"] = blocks["land_use"].map(LAND_USE_RU)
     blocks["strelka_morphotype"] = blocks["strelka_morphotype"].map(STRELKA_RU)
     blocks["spacematrix_morphotype"] = blocks["spacematrix_morphotype"].map(spacematrix_ru)
@@ -131,6 +182,8 @@ def main() -> None:
     data = {
         "summary": summary,
         "built": date.today().isoformat(),
+        "findings": findings_html(config.ROOT / "docs" / "findings.md"),
+        "sm_groups": sm_groups,
         "blocks": to_features(blocks, BLOCK_FIELDS),
         "schools": to_features(schools, {"name": ("name", None), "capacity": ("cap", 0),
                                          "capacity_is_estimated": ("est", None)}),

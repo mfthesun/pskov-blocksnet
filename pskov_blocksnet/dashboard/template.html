@@ -55,7 +55,7 @@ h2{font-size:17px;margin:22px 0 10px}
 table.data{width:100%;border-collapse:collapse;font-size:13px}
 table.data th,table.data td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
 table.data th{cursor:pointer;color:var(--muted);font-weight:600;user-select:none;position:sticky;top:0;background:#fff}
-table.data th:nth-child(2),table.data td:nth-child(2),table.data th:nth-child(11),table.data td:nth-child(11){text-align:left}
+#tbl th:nth-child(2),#tbl td:nth-child(2),#tbl th:nth-child(11),#tbl td:nth-child(11){text-align:left}
 table.data tbody tr:hover{background:#f3f7fb;cursor:pointer}
 .table-wrap{overflow-x:auto}
 .table-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
@@ -70,6 +70,7 @@ table.dict{width:100%;border-collapse:collapse;font-size:12.5px}
 table.dict td,table.dict th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
 table.dict th{color:var(--muted)}
 code{background:#eef1f5;padding:0 4px;border-radius:4px;font-size:12px}
+#findings ol{margin:0;padding-left:20px;line-height:1.55}#findings li{margin:6px 0}
 footer{color:var(--muted);font-size:12px;margin-top:20px;border-top:1px solid var(--line);padding-top:10px}
 @media (max-width:900px){.grid-map{grid-template-columns:1fr}#map{height:460px}}
 </style>
@@ -124,6 +125,12 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;border-top:1px solid va
     <div class="card chart"><h3>Доступность с учётом площади, мин</h3><div class="hint">Взвешенное по площади среднее время пешком до остальных кварталов (<code>area_accessibility</code>)</div><div id="ch-acc"></div></div>
   </div>
 
+  <div class="card" style="margin-top:12px">
+    <h3>Характеристики групп Spacematrix</h3>
+    <div class="hint">Центры кластеров <code>get_spacematrix_morphotypes</code>: FSI — плотность (м²/м²), L — этажность, GSI = FSI / L — доля застройки, MXI — доля жилой площади. Кварталы без застройки в группы не входят.</div>
+    <div class="table-wrap"><table class="data" id="sm-groups"></table></div>
+  </div>
+
   <h2>Школы: обеспеченность местами <span class="est">оценка</span></h2>
   <div class="grid-charts">
     <div class="card chart"><h3>Баланс спроса и мест</h3><div class="hint">Модель <code>competitive_provision</code>: 120 мест на 1000 жителей, норматив доступности 15 мин</div><div id="ch-prov"></div>
@@ -147,6 +154,9 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;border-top:1px solid va
     <div class="table-wrap"><table class="data" id="tbl"><thead></thead><tbody></tbody></table></div>
     <div class="pager"><button id="pg-prev">←</button><span id="pg-info"></span><button id="pg-next">→</button></div>
   </div>
+
+  <h2>Выводы</h2>
+  <div class="card" id="findings"></div>
 
   <h2>Методика, источники и ограничения</h2>
   <div class="method">
@@ -547,9 +557,12 @@ document.getElementById('dl-geojson').onclick = () => download('pskov_blocks.geo
 const A = S.authors || {};
 document.getElementById('author-heritage').textContent = A.heritage || '';
 document.getElementById('author-transport').textContent = A.transport || '';
-document.getElementById('subtitle').textContent = `${S.territory}, ${S.region} · ${nWord(T.blocks, 'квартал', 'квартала', 'кварталов')} · BlocksNet ${S.blocksnet_version} · пешеходная сеть ${fmt(S.walk_speed_kmh)} км/ч · сборка ${DATA.built}`;
+document.getElementById('subtitle').textContent = `${S.territory}, ${S.region} · ${nWord(T.blocks, 'квартал', 'квартала', 'кварталов')} · BlocksNet ${S.blocksnet_version} · пешеходная сеть ${fmt(S.walk_speed_kmh)} км/ч · данные OSM от ${S.osm_date || '—'} · сборка ${DATA.built}`;
+document.getElementById('findings').innerHTML = DATA.findings || '<div class="note">Выводы — в docs/findings.md</div>';
+document.getElementById('sm-groups').innerHTML = '<thead><tr><th>Кл.</th><th style="text-align:left">Группа</th><th>Кварталов</th><th>Жителей*</th><th>FSI</th><th>L, эт.</th><th>GSI</th><th>MXI</th></tr></thead><tbody>' +
+  (DATA.sm_groups || []).map(g => `<tr><td>${g.cluster}</td><td style="text-align:left">${esc(g.name)}</td><td>${fmt(g.blocks)}</td><td>${fmt(g.pop)}</td><td>${fmt(g.fsi, 2)}</td><td>${fmt(g.l, 1)}</td><td>${fmt(g.gsi, 2)}</td><td>${fmt(g.mxi, 2)}</td></tr>`).join('') + '</tbody>';
 document.getElementById('sources').innerHTML = [
-  `<b>OpenStreetMap</b> — дороги, ж/д, вода, функциональные зоны (<code>landuse</code>), ${nWord(T.buildings, 'здание', 'здания', 'зданий')}, ${nWord(T.schools, 'школа', 'школы', 'школ')}, пешеходный граф. Выгрузка Псковской области (<code>pskov_oblast.pbf</code>), © участники OpenStreetMap, ODbL.`,
+  `<b>OpenStreetMap</b> — дороги, ж/д, вода, функциональные зоны (<code>landuse</code>), ${nWord(T.buildings, 'здание', 'здания', 'зданий')}, ${nWord(T.schools, 'школа', 'школы', 'школ')}, пешеходный граф. Выгрузка Псковской области (<code>pskov_oblast.pbf</code>) от ${S.osm_date || '—'}, © участники OpenStreetMap, ODbL.`,
   `<b>Граница городского округа Псков</b> — административная граница OSM.`,
   `<b>Объекты культурного наследия и зоны охраны</b> — материалы по обоснованию схемы территориального планирования (СТП) Псковской области 2025 г.; ${nWord(T.okn_points, 'точечный объект', 'точечных объекта', 'точечных объектов')}, ${nWord(T.protection_zones, 'зона охраны', 'зоны охраны', 'зон охраны')}. Подготовка — ${esc(A.heritage)}.`,
   `<b>Остановки общественного транспорта</b> — OSM (<code>highway=bus_stop</code>), Яндекс.Расписания, ж/д платформы; ${nWord(T.stops, 'остановка', 'остановки', 'остановок')}. Подготовка — ${esc(A.transport)}.`,

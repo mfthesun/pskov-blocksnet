@@ -18,7 +18,7 @@
 
 ## Слои OSM (`data/osm/`)
 
-Извлечены из `pskov_oblast.pbf` (выгрузка OSM по Псковской области, © участники OpenStreetMap, лицензия ODbL)
+Извлечены из `pskov_oblast.pbf` (выгрузка OSM по Псковской области **от 17.06.2026**, © участники OpenStreetMap, лицензия ODbL)
 библиотекой `pyrosm` — см. `pskov_blocksnet/osm_pbf.py`. Теги совпадают с `pipeline.ipynb`.
 
 | Файл | Объектов | Теги |
