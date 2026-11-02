@@ -23,7 +23,7 @@ DASHBOARD_PATH = ROOT / "dashboard.html"
 CITY_PBF = OSM_DIR / "pskov_city.osm.pbf"
 PBF_PATH = Path(os.environ.get("PSKOV_PBF", CITY_PBF))
 # Региональная выгрузка OSM (Псковская область, ~45 МБ) в репозиторий не входит — нужна только prepare_data.py.
-REGION_PBF = Path.home() / "Claude" / "ИИ, анализ данных и моделирование в урбанистике" / "PSKOKN" / "данные и материалы" / "pskov_oblast.pbf"
+REGION_PBF = Path.home() / "Workspace" / "ИИ, анализ данных и моделирование в урбанистике" / "PSKOKN" / "данные и материалы" / "pskov_oblast.pbf"
 
 # --- Территория -------------------------------------------------------------
 

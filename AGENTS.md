@@ -1,9 +1,9 @@
-# CLAUDE.md — инструкции для Claude Code
+# AGENTS.md — инструкции для Kimi Code
 
 Учебный проект: квартальная модель **г. Пскова** на **BlocksNet 1.0.0a9** + интерактивный дашборд.
 Практика 2 дисциплины «Технологии ИИ в урбанистике» (ИДУ ИТМО). Авторы — Яковлев Д. А., Цыганов В. А. (C4207).
 Задание: https://mvin8.github.io/ai-technologies-in-urbanism/content/practice/practice-02.html
-(в задании агент — OpenCode; преподаватель разрешил любой агент, здесь — Claude Code).
+(в задании агент — OpenCode; преподаватель разрешил любой агент, здесь — Kimi Code).
 
 Отвечай и пиши документацию **по-русски**.
 
@@ -56,7 +56,7 @@ scripts/build_dashboard.py        data/results  ->  dashboard.html              
 | `notebooks/pskov_blocksnet.ipynb` | все расчёты BlocksNet с пояснениями, стоп-точки, выводы |
 | `data/results/` | результаты (GeoJSON, `summary.json`) — источник для дашборда |
 | `docs/` | план, запросы, перезапуск, выводы, сверка, данные, шпаргалки по библиотекам |
-| `.claude/commands/` | слэш-команды проекта (`/run-notebook`, `/build-dashboard`, `/verify`, `/push-github`, `/add-metric`) |
+| `.kimi-code/skills/` | повторно используемые процессы `verify-results` и `add-metric`; запуск ноутбука и сборка — `make notebook`, `make dashboard` |
 
 ## Известные подводные камни (проверено)
 

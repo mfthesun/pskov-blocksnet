@@ -3,12 +3,12 @@
 | Файл | О чём |
 |---|---|
 | [plan.md](plan.md) | план работы по этапам и ключевые решения |
-| [prompts.md](prompts.md) | основные запросы к агенту (адаптация запросов задания под Claude Code) |
+| [prompts.md](prompts.md) | основные запросы к агенту (адаптация запросов задания под Kimi Code) |
 | [rerun.md](rerun.md) | инструкция повторного запуска (Linux/macOS/Windows), частые ошибки |
 | [findings.md](findings.md) | выводы по Пскову |
 | [verification.md](verification.md) | сверка «показатель — ноутбук — дашборд», итоговые числа |
 | [data.md](data.md) | данные, источники, авторство, качество OSM |
-| [claude-code.md](claude-code.md) | как работать с Claude Code в репозитории (вместо OpenCode) |
+| [kimi-code.md](kimi-code.md) | как работать с Kimi Code в репозитории (вместо OpenCode) |
 | [roadmap.md](roadmap.md) | что можно сделать дальше |
 | [libraries/blocksnet.md](libraries/blocksnet.md) | шпаргалка BlocksNet 1.0.0a9: конвейер, функции, подводные камни |
 | [libraries/iduedu.md](libraries/iduedu.md) | IduEdu 0.4.1 vs 2.2.0, графы |
