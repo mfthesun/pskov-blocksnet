@@ -73,13 +73,15 @@ make check
 python scripts/prepare_data.py --source "<папка PSKOKN>" [--pbf <путь к pskov_oblast.pbf>]   # нужен osmium-tool для вырезки
 ```
 
-## 5. Через Claude Code
+## 5. Через Kimi Code
 
 ```bash
-claude                      # в корне репозитория; CLAUDE.md подхватится автоматически
+kimi                        # в корне репозитория; AGENTS.md подхватится автоматически
+# если CLI ещё не в PATH: ~/.kimi-code/bin/kimi
 ```
 
-* `/run-notebook` — пересчёт; `/build-dashboard` — сборка страницы; `/verify` — сверка; `/push-github <адрес>` — публикация.
+* `make notebook` — пересчёт; `make dashboard` — сборка страницы; скилл `verify-results` — сверка;
+  скилл `add-metric` — добавление показателя через согласованный план.
 
 ## Частые ошибки
 

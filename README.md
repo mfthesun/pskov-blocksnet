@@ -10,8 +10,8 @@
 и остановки транспорта из смежных проектов.
 
 Задание: [practice-02](https://mvin8.github.io/ai-technologies-in-urbanism/content/practice/practice-02.html).
-В задании используется агент OpenCode; с разрешения преподавателя работа выполнена с **Claude Code**
-(см. [`docs/claude-code.md`](docs/claude-code.md)).
+В задании используется агент OpenCode; с разрешения преподавателя работа выполнена с **Kimi Code**
+(см. [`docs/kimi-code.md`](docs/kimi-code.md)).
 
 ## Что в репозитории
 
@@ -25,7 +25,7 @@
 | [`pskov_blocksnet/`](pskov_blocksnet) | вспомогательный пакет: настройки, чтение OSM из PBF, шаблон дашборда |
 | [`data/input/`](data/input), [`data/osm/`](data/osm) | входные слои, обрезанные по границе Пскова |
 | [`docs/`](docs) | план, основные запросы, перезапуск, выводы, сверка, данные, шпаргалки по библиотекам ИДУ |
-| [`CLAUDE.md`](CLAUDE.md), [`.claude/`](.claude) | инструкции и слэш-команды для Claude Code |
+| [`AGENTS.md`](AGENTS.md), [`.kimi-code/`](.kimi-code) | инструкции и повторно используемые скиллы для Kimi Code |
 | [`pyproject.toml`](pyproject.toml) | зависимости (BlocksNet 1.0.0a9 и др.) |
 
 ## Быстрый старт

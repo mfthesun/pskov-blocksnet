@@ -30,7 +30,7 @@ from pskov_blocksnet import config  # noqa: E402
 from pskov_blocksnet.io import write_geojson  # noqa: E402
 from pskov_blocksnet.osm_pbf import extract_layers  # noqa: E402
 
-DEFAULT_SOURCE = Path.home() / "Claude" / "ИИ, анализ данных и моделирование в урбанистике" / "PSKOKN"
+DEFAULT_SOURCE = Path.home() / "Workspace" / "ИИ, анализ данных и моделирование в урбанистике" / "PSKOKN"
 
 # Школы: в OSM под amenity=school попадают и не общеобразовательные учреждения.
 NOT_GENERAL_SCHOOL = r"футбол|спорт|кибер|внешкольн|музык|художеств|автошкол|танц|искусств"
